@@ -1,3 +1,4 @@
 import BearerParser from '~/BearerParser';
 import BearerValidator from '~/BearerValidator';
-export { BearerParser, BearerValidator };
+import BearerValidatorOptions from '~/types/BearerValidatorOptions';
+export { BearerParser, BearerValidator, BearerValidatorOptions };

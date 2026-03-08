@@ -1,71 +1,59 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
+Format based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [2.0.0] - 2024/3/19
+## [2.1.0] - 2026-03-09
+
 ### Added
-- The token parser class (`BearerParser` class) now supports methods to retrieve tokens from Query or Body.
-    See the [API reference](API.md) for more details.
-
-    |Method|Description|
-    |--|--|
-    |`BearerParser.parseBearerToken()`|Alias for `BearerParser.parseBearerTokenHeader`.|
-    |`BearerParser.parseBearerTokenHeader()`|New. Get the bearer token from the `Authorization` request header.|
-    |`BearerParser.parseBearerTokenQuery()`|New. Get a bearer token from the `query` parameter.|
-    |`BearerParser.parseBearerTokenBody()`|New. Get a bearer token from the `body` parameter.|
-- Token authentication middleware (`BearerValidator` class) now supports `Query` or `Body` token validation.  
-    To validate a `Query` or `Body` token, specify `query` or `body` in the `tokenLocation` option and the parameter name of the token in the `tokenParameter` option.  
-    See the [API reference](API.md) for more details.
-
-    ```js
-    // Token authentication middleware initialization.
-    BearerValidator.validation({
-        // Select the Token location as header/body/query.
-        tokenLocation: 'query',
-
-        // If the token location is query or body, specify the parameter name of the token.
-        tokenParameter: 'access_token',
-
-        // Realm name to be included in response headers.
-        realm: 'myapi',
-        tokenCheckCallback: async (token) => {
-            // Return `TRUE` if the token is correct.
-            // If you return `FALSE`, a `401` error will be returned by the `BearerValidator.validation` middleware.
-            return token === '<Your Bearer token>';
-        },
-    }),
-    ```
+- **`BearerValidatorOptions` export** — TypeScript users can now import the options type directly for type-safe middleware configuration
+- **Express 5 support** — compatible with both Express 4 (`^4.17.0`) and Express 5 (`^5.0.0`)
 
 ### Changed
-- TypeScript was updated from version 3 to 5.
-- The parameter type of `BearerParser.parseBearerToken()` has changed.  
-    The parameter type used to be `{authorization: string}`, but now it is `{headers: {authorization: string}}`.
+- **Zero runtime dependencies** — Express is now a peer dependency; no bundled runtime packages
+- **Comprehensive README** — integrated API reference, validation flow diagram, and usage examples for all token sources
+- **Enhanced TypeScript definitions** — full JSDoc with `@example`, `@default`, and `@throws` annotations across all public APIs
+- **Modernized toolchain** — Rollup 4, Jest 30, TypeScript 5.9
 
-## [1.0.3] - 2021/11/11
+### Removed
+- `API.md` — API reference is now part of README
+
+## [2.0.0] - 2024-03-19
+
+### Added
+- **Query & Body token support** — `BearerParser` and `BearerValidator` now handle tokens from query strings and request bodies, not just the `Authorization` header.
+  - `BearerParser.parseBearerTokenQuery()` — extract a token from a query parameter
+  - `BearerParser.parseBearerTokenBody()` — extract a token from the request body
+  - `BearerValidator.validation()` accepts `tokenLocation` (`'header'` | `'query'` | `'body'`) and `tokenParameter` options
+- `BearerParser.parseBearerTokenHeader()` — explicit method for header extraction
+- `BearerParser.parseBearerToken()` — alias for `parseBearerTokenHeader` (backward compatible)
+
+### Changed
+- **TypeScript 3 → 5** — modernized type definitions
+- **Breaking:** `BearerParser.parseBearerToken()` parameter type changed from `{authorization: string}` to `{headers: {authorization: string}}` to match the standard Express request shape
+
+## [1.0.3] - 2021-11-11
+
+### Changed
+- Internal code cleanup and example app improvements
+
+## [1.0.2] - 2020-11-22
+
 ### Fixed
-- Refactor your code. Fixed example app.
+- Corrected `WWW-Authenticate` header format when the token is missing — now returns `error="token_required"` as a separate field instead of embedding it in the realm
 
-## [1.0.2] - 2020/11/22
+## [1.0.1] - 2020-11-22
+
 ### Fixed
-- Changed error response when request does not have `Authorization` header.  
-    After:  
-    ```sh
-    www-authenticate: Bearer realm="myapi", error="token_required"
-    ```
+- Documentation corrections
 
-    Before:  
-    ```sh
-    www-authenticate: Bearer realm="token_required"
-    ```
+## [1.0.0] - 2020-11-22
 
-## [1.0.1] - 2020/11/22
-### Fixed
-- Fix screen capture.
+Initial release — Bearer token parser & validator middleware for Express with RFC 6750-compliant error responses.
 
-## [1.0.0] - 2020/11/22
-### Fixed
-- First release.
-
-[1.0.1]: https://github.com/takuya-motoshima/bearer-token-parser/compare/v1.0.0...v1.0.1
-[1.0.2]: https://github.com/takuya-motoshima/bearer-token-parser/compare/v1.0.1...v1.0.2
-[1.0.3]: https://github.com/takuya-motoshima/bearer-token-parser/compare/v1.0.2...v1.0.3
-[2.0.0]: https://github.com/takuya-motoshima/bearer-token-parser/compare/v1.0.3...v2.0.0
+[1.0.0]: https://github.com/shumatsumonobu/bearer-token-parser/releases/tag/v1.0.0
+[1.0.1]: https://github.com/shumatsumonobu/bearer-token-parser/compare/v1.0.0...v1.0.1
+[1.0.2]: https://github.com/shumatsumonobu/bearer-token-parser/compare/v1.0.1...v1.0.2
+[1.0.3]: https://github.com/shumatsumonobu/bearer-token-parser/compare/v1.0.2...v1.0.3
+[2.0.0]: https://github.com/shumatsumonobu/bearer-token-parser/compare/v1.0.3...v2.0.0
+[2.1.0]: https://github.com/shumatsumonobu/bearer-token-parser/compare/v2.0.0...v2.1.0

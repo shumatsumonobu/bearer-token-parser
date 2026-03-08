@@ -1,1 +1,9 @@
+# Dependencies
 node_modules/
+
+# Development only
+sandbox/
+__tests__/
+
+# AI assistant
+.claude/

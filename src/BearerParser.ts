@@ -1,77 +1,121 @@
 import express from "express";
 
 /**
- * Bearer token parser.
+ * Utility class for extracting Bearer tokens from HTTP requests.
+ * Supports extraction from the `Authorization` header, query parameters, and request body.
  */
 export default class BearerParser {
   /**
-   * A regular expression to find the bearer token in the `Authorization` request header.
+   * Regular expression to extract the Bearer token from the `Authorization` header.
+   * Matches the format: `Bearer <token>` where `<token>` consists of URL-safe Base64 characters.
    * @type {RegExp}
    */
   private static REGEX_BEARER_TOKEN = /^Bearer\s+([A-Za-z0-9\-\._~\+\/]+)=*$/;
 
   /**
-   * Alias for `BearerParser.parseBearerTokenHeader`.
-   * @param {express.Request|{headers: {authorization: string}}} req Request object. Object with `express.Request` or `headers.authorization` item.
-   * @return {string|undefined} `Authorization` request header bearer token.
+   * Extracts a Bearer token from the `Authorization` request header.
+   * This is an alias for {@link BearerParser.parseBearerTokenHeader}.
+   *
+   * @param {express.Request | {headers: {authorization?: string}}} req - The request object, either an Express `Request` or any object with a `headers.authorization` property.
+   * @returns {string | undefined} The extracted token string, or `undefined` if not found.
+   * @example
+   * ```typescript
+   * import {BearerParser} from 'bearer-token-parser';
+   *
+   * const token = BearerParser.parseBearerToken(req);
+   * if (token) {
+   *   console.log('Token:', token);
+   * }
+   * ```
    */
   public static parseBearerToken(req: express.Request|{headers: {authorization? : string}}): string|undefined {
     return this.parseBearerTokenHeader(req);
   }
 
   /**
-   * Get the bearer token from the `Authorization` request header.
-   * If unable to retrieve, return undefined.
-   * @param {express.Request|{headers: {authorization: string}}} req Request object. Object with `express.Request` or `headers.authorization` item.
-   * @return {string|undefined} `Authorization` request header bearer token.
+   * Extracts a Bearer token from the `Authorization` request header.
+   * Parses the header value matching the pattern `Bearer <token>` and returns the token portion.
+   *
+   * @param {express.Request | {headers: {authorization?: string}}} req - The request object, either an Express `Request` or any object with a `headers.authorization` property.
+   * @returns {string | undefined} The extracted token string, or `undefined` if the header is missing or the format is invalid.
+   * @example
+   * ```typescript
+   * import {BearerParser} from 'bearer-token-parser';
+   *
+   * // Express route handler
+   * app.get('/api/resource', (req, res) => {
+   *   const token = BearerParser.parseBearerTokenHeader(req);
+   *   if (!token) {
+   *     return res.status(401).json({error: 'No token provided'});
+   *   }
+   *   // Verify token...
+   * });
+   * ```
    */
   public static parseBearerTokenHeader(req: express.Request|{headers: {authorization? : string}}): string|undefined {
     if (!req.headers || !req.headers.authorization)
-      // If there is no `Authorization` header.
       return undefined;
 
-    // Find the bearer token in the `Authorization` header.
-    const matches = req.headers.authorization.match(BearerParser.REGEX_BEARER_TOKEN);
-
-    // Return the bearer tokens found.
-    return matches ? matches[1] : undefined;
+    // Match the Bearer token pattern in the Authorization header.
+    const match = req.headers.authorization.match(BearerParser.REGEX_BEARER_TOKEN);
+    return match ? match[1] : undefined;
   }
 
   /**
-   * Get a bearer token from the `query` parameter.
-   * If unable to retrieve, return undefined.
-   * @param {express.Request|{query: {[key: string]: any}}} req Request object with `express.Request` or `query` object item.
-   * @param {string} tokenParameter The parameter name of the token in the query. Default is `access_token`.
-   * @return {string|undefined} Query parameter bearer token.
+   * Extracts a Bearer token from a query string parameter.
+   *
+   * @param {express.Request | {query: {[key: string]: any}}} req - The request object, either an Express `Request` or any object with a `query` property.
+   * @param {string} [tokenParameter='access_token'] - The name of the query parameter containing the token.
+   * @returns {string | undefined} The extracted token string, or `undefined` if the parameter is missing.
+   * @example
+   * ```typescript
+   * import {BearerParser} from 'bearer-token-parser';
+   *
+   * // GET /api/resource?access_token=abc123
+   * app.get('/api/resource', (req, res) => {
+   *   const token = BearerParser.parseBearerTokenQuery(req, 'access_token');
+   *   if (!token) {
+   *     return res.status(401).json({error: 'No token provided'});
+   *   }
+   *   // Verify token...
+   * });
+   * ```
    */
   public static parseBearerTokenQuery(
     req: express.Request|{query: {[key: string]: any}},
     tokenParameter: string = 'access_token'
   ): string|undefined {
     if (!req.query || !req.query[tokenParameter])
-      // The request object has no query or no token parameter.
       return undefined;
-
-    // Returns the found token.
     return req.query[tokenParameter];
   }
 
   /**
-   * Get a bearer token from the `body` parameter.
-   * If unable to retrieve, return undefined.
-   * @param {express.Request|{body: {[key: string]: any}}} req Request object with `express.Request` or `body` object item.
-   * @param {string} tokenParameter Parameter name of the token in the body. Default is `access_token`.
-   * @return {string|undefined} Body parameter bearer token.
+   * Extracts a Bearer token from the request body.
+   *
+   * @param {express.Request | {body: {[key: string]: any}}} req - The request object, either an Express `Request` or any object with a `body` property.
+   * @param {string} [tokenParameter='access_token'] - The name of the body parameter containing the token.
+   * @returns {string | undefined} The extracted token string, or `undefined` if the parameter is missing.
+   * @example
+   * ```typescript
+   * import {BearerParser} from 'bearer-token-parser';
+   *
+   * // POST /api/resource with body { access_token: 'abc123' }
+   * app.post('/api/resource', (req, res) => {
+   *   const token = BearerParser.parseBearerTokenBody(req, 'access_token');
+   *   if (!token) {
+   *     return res.status(401).json({error: 'No token provided'});
+   *   }
+   *   // Verify token...
+   * });
+   * ```
    */
   public static parseBearerTokenBody(
     req: express.Request|{body: {[key: string]: any}},
     tokenParameter: string = 'access_token'
   ): string|undefined {
     if (!req.body || !req.body[tokenParameter])
-      // The request object has no body or no token parameter.
       return undefined;
-
-    // Returns the found token.
     return req.body[tokenParameter];
   }
 }

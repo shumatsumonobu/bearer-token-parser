@@ -1,0 +1,21 @@
+flowchart TD
+  subgraph "BearerValidator.validation()"
+    direction TB
+    A[Incoming Request] --> B{Token source exists?<br/>header / query / body}
+    B -- No --> B1[401 error=token_required]
+    B -- Yes --> C["BearerParser<br/>extracts token"]
+    C --> D{Valid format?}
+    D -- No --> D1[401 error=invalid_token<br/>Token format error]
+    D -- Yes --> E{Token check<br/>passes?}
+    E -- No --> E1[401 invalid_token<br/>Cannot authenticate]
+    E -- Yes / not set --> F{Request params<br/>valid?}
+    F -- No --> F1[400 error=invalid_request]
+    F -- Yes / not set --> G["next() — request proceeds"]
+  end
+
+  style B1 fill:#f87171,color:#000
+  style D1 fill:#f87171,color:#000
+  style E1 fill:#f87171,color:#000
+  style F1 fill:#fbbf24,color:#000
+  style G fill:#4ade80,color:#000
+  style C fill:#60a5fa,color:#000

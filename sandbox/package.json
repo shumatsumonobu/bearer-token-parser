@@ -1,0 +1,14 @@
+{
+  "name": "bearer-token-parser-sandbox",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "start:esm": "node app.js",
+    "start:cjs": "node app.cjs"
+  },
+  "dependencies": {
+    "bearer-token-parser": "file:..",
+    "express": "^4.21.0"
+  }
+}
